@@ -44,23 +44,23 @@ Legend: 🧍 = needs the user (you) to do something — listed in `docs/USER-INP
 
 Location: `src/components/sim/engine/`.
 
-- [ ] `prng.ts` — `PRNG` interface + `MathRandom`, `CryptoRandom`, `Mulberry32(seed)` impls. Both `next()` → [0,1) and `nextAngle()` → [0, 2π)
-- [ ] `entity.ts` — `Entity { id, type, x, y, angle, flashUntil }`
-- [ ] `world.ts` — spatial hash (16×16 cells), add/remove, neighbour query
-- [ ] `collision.ts` — circle-overlap test, RPS winner lookup, chaos-mode branch
-- [ ] `stats.ts` — accumulators for `drawsHist[20]`, `dirHist[16]`, `heatmap[1024]`, `populationSeries` (5 Hz sampler), `minPopulationOfWinner`
-- [ ] `step.ts` — `step(world, dt)`: advance, reflect walls, resolve collisions, stats
-- [ ] `run.ts` — orchestrator; returns `RunResult` that **must** contain `winner`, `durationMs`, `screenW`, `screenH`
-- [ ] `index.ts` — barrel export
+- [x] `prng.ts` — `PRNG` interface + `MathRandom`, `CryptoRandom`, `Mulberry32(seed)` impls. Both `next()` → [0,1) and `nextAngle()` → [0, 2π)
+- [x] `entity.ts` — `Entity { id, type, x, y, angle, flashUntil }`
+- [x] `world.ts` — spatial hash (16×16 cells), add/remove, neighbour query
+- [x] `collision.ts` — circle-overlap test, RPS winner lookup, chaos-mode branch
+- [x] `stats.ts` — accumulators for `drawsHist[20]`, `dirHist[16]`, `heatmap[1024]`, `populationSeries` (5 Hz sampler), `minPopulationOfWinner`
+- [x] `step.ts` — `step(world, dt)`: advance, reflect walls, resolve collisions, stats
+- [x] `run.ts` — orchestrator; returns `RunResult` that **must** contain `winner`, `durationMs`, `screenW`, `screenH`
+- [x] `index.ts` — barrel export
 
 ### Engine tests (`bun test`)
 
-- [ ] Determinism: same `mulberry32` seed ⇒ identical tick-by-tick state
-- [ ] RPS rule: rock+paper ⇒ both become paper
-- [ ] Same-type touch: no change
-- [ ] Wall bounce: angle reflected correctly on all four walls
-- [ ] Stats: histograms sum to expected totals, heatmap sums to `tickCount × entityCount`
-- [ ] `RunResult` always has the four required fields
+- [x] Determinism: same `mulberry32` seed ⇒ identical tick-by-tick state
+- [x] RPS rule: rock+paper ⇒ both become paper
+- [x] Same-type touch: no change
+- [x] Wall bounce: angle reflected correctly on all four walls
+- [x] Stats: histograms sum to expected totals, heatmap sums to `tickCount × entityCount`
+- [x] `RunResult` always has the four required fields
 
 ---
 

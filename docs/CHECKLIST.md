@@ -29,8 +29,8 @@ Legend: 🧍 = needs the user (you) to do something — listed in `docs/USER-INP
 ### 0.4 DB schema
 
 - [x] `supabase/migrations/0001_init.sql` authored (tables, RLS insert-only, `leaderboard_view`)
-- [ ] 🧍 Migration applied to the Supabase project
-- [ ] Smoke-test: insert a dummy `simulations` row via the service-role client
+- [x] 🧍 Migration applied to the Supabase project
+- [x] Smoke-test: insert a dummy `simulations` row via the service-role client (`bun run --env-file=.env scripts/smoke-supabase.ts`)
 
 ### 0.5 Layout additions
 

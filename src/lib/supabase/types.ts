@@ -52,6 +52,9 @@ export type SimulationInsert = Omit<SimulationRow, "id" | "created_at">;
 export type SimulationSamplesInsert = SimulationSamplesRow;
 
 export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: "12";
+  };
   public: {
     Tables: {
       simulations: {

@@ -13,8 +13,7 @@
 ## 3. Users
 
 - Curious developers and students.
-- **No login required.** Anyone can open the app and run, save, and browse simulations. Every browser gets a `client_id` in `localStorage` that attaches to its runs.
-- Sign-in (magic link) is optional and purely additive: on first login, past anon runs from the same browser are attached to the account, enabling cross-device history.
+- **No accounts. No login.** Every browser gets a `client_id` (UUID) in `localStorage` on first visit; that's the only identity. It attaches to every saved run and is what we use to show "your history". A cleared localStorage ⇒ a fresh identity; that's fine for this project.
 
 ## 4. Core experience
 
@@ -31,7 +30,7 @@
 - Bounce off viewport edges (reflect).
 - Collision rule: entity overlap → loser transforms into winner's type. Same-type touches do nothing. Short flash/scale animation (~150ms).
 - End: all entities one type → `winner` recorded. Timeout at 15 min → `winner = timeout`.
-- **Always captured on run end (non-negotiable):** `winner`, `duration_ms`, `screen_w`, `screen_h`, `client_id`. These four + id go to every saved row.
+- **Always captured on run end (non-negotiable):** `winner`, `duration_ms`, `screen_w`, `screen_h`, `client_id`. These + id go to every saved row.
 - Controls: start / pause / step / reset, speed multiplier 0.5×/1×/2×/4×.
 
 ### 4.2 PRNG comparison (the actual experiment)
@@ -55,7 +54,7 @@
 - Floating **Analytics** (bottom-right): opens bottom drawer.
 - Floating **About** (top-right): sheet with project explainer, PRNG primer, stat-test primer.
 - Floating **Hide UI** toggle: hides all floating elements for a clean canvas; small corner peek-button brings them back.
-- Run-end toast: winner + duration + auto-save (authed) or "Save" prompt (anon).
+- Run-end toast: winner + duration; auto-saved.
 
 ### 4.5 Analytics drawer (bottom drawer)
 
@@ -70,7 +69,7 @@ Three tabs:
 - Chi-square, KS, entropy values.
 - Config summary.
 
-**History** — user's past runs (by user_id or client_id); filter by PRNG, movement mode, counts; click → detail dialog with per-run charts.
+**History** — past runs for the current `client_id`; filter by PRNG, movement mode, counts; click → detail dialog with per-run charts.
 
 **Leaderboard** — global aggregates (anonymized):
 
@@ -86,20 +85,20 @@ Three tabs:
 
 ### 4.7 Extras (in scope for v1)
 
-- **Winner prediction** — pick a type before starting; hit-rate tracked in the user's profile.
+- **Winner prediction** — pick a type before starting; hit-rate tracked per `client_id`.
 - **Chaos mode** — on collision, small configurable chance the loser becomes a *random* type instead of the winner's type.
 - **Motion trails** — fading alpha on the canvas clear for visual intuition.
 - **Sound** — tiny WebAudio synth click on collision, fanfare on victory, mute switch.
 - **Shareable PNG result card** — final canvas + stats, exported via `canvas.toDataURL`.
 - **Kill-chain view** — tree of who-beat-whom for the final survivor.
 
-## 5. Data & auth
+## 5. Data
 
 ### 5.1 Supabase
 
-- Fully anonymous by default — no auth required to save runs or view analytics/leaderboard.
-- Optional magic-link sign-in. On sign-in, anon runs matching the browser's `client_id` are attached to `user_id`.
-- Rate limit: 1000 runs per `user_id` or `client_id` (soft cap, server-enforced; auto-run counts).
+- No auth. No accounts. All access is anonymous; `client_id` (localStorage UUID) is the only identity.
+- Writes go through a Next.js Route Handler that uses the Supabase `service_role` key server-side, so RLS stays strict (no direct anon reads of raw rows).
+- Rate limit: 1000 runs per `client_id` (soft cap, server-enforced; auto-run counts).
 
 ### 5.2 Schema
 
@@ -113,7 +112,7 @@ Three tabs:
 - A user opens the app, gets a running sim within 1s, and sees a converged result in under 30s for default config.
 - After 100 runs across PRNGs, the leaderboard shows measurable differences (or the lack thereof) in per-PRNG convergence time.
 - Chi-square / KS tooltips are understandable by a developer who hasn't taken stats in a decade.
-- Everything works offline-except-save for anon users; saves succeed as soon as network returns.
+- Everything works offline-except-save; saves succeed as soon as network returns.
 
 ## 7. Out of scope (v1)
 
@@ -124,6 +123,5 @@ Three tabs:
 
 ## 8. Open questions
 
-- Global vs authed-only leaderboard. (Planning: global, with hashed `client_id` for anon identity.)
 - Dark/light toggle in UI, or follow system. (Planning: follow system for v1.)
 - Default keyboard shortcuts — `space` pause, `r` reset, `a` analytics, `h` hide UI. Open to change.

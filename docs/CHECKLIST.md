@@ -10,33 +10,33 @@ Legend: 🧍 = needs the user (you) to do something — listed in `docs/USER-INP
 
 ### 0.1 Dependencies
 
-- [ ] `bun add @supabase/supabase-js @supabase/ssr recharts zustand sonner`
-- [ ] `bunx shadcn@latest add drawer sheet slider tabs select switch input tooltip sonner card badge label separator skeleton dialog`
+- [x] `bun add @supabase/supabase-js @supabase/ssr recharts zustand sonner`
+- [x] `bunx shadcn@latest add drawer sheet slider tabs select switch input tooltip sonner card badge label separator skeleton dialog`
 
 ### 0.2 Environment & config
 
-- [ ] 🧍 Supabase project created; URL + anon key provided
-- [ ] `.env.example` committed with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- [ ] `.env.local` populated locally (not committed)
-- [ ] `.gitignore` updated to ignore `.env.local` if missing
+- [x] 🧍 Supabase project created; URL + publishable key + secret key provided
+- [x] `.env.example` committed with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`
+- [x] `.env` populated locally (not committed)
+- [x] `.gitignore` already ignores `.env*`
 
 ### 0.3 Supabase clients
 
-- [ ] `src/lib/supabase/client.ts` — browser client via `@supabase/ssr`
-- [ ] `src/lib/supabase/server.ts` — server client (cookie-based)
-- [ ] `src/lib/supabase/types.ts` — generated or hand-written DB types
+- [x] `src/lib/supabase/client.ts` — browser client (publishable key, inserts only)
+- [x] `src/lib/supabase/server.ts` — server client (secret key, bypasses RLS)
+- [x] `src/lib/supabase/types.ts` — hand-written DB types (no `user_id`)
 
 ### 0.4 DB schema
 
-- [ ] `supabase/migrations/0001_init.sql` authored (tables, RLS, `leaderboard_view`)
+- [x] `supabase/migrations/0001_init.sql` authored (tables, RLS insert-only, `leaderboard_view`)
 - [ ] 🧍 Migration applied to the Supabase project
-- [ ] Table smoke-test: can insert/select a dummy `simulations` row from the server client
+- [ ] Smoke-test: insert a dummy `simulations` row via the service-role client
 
 ### 0.5 Layout additions
 
-- [ ] `src/app/layout.tsx` — add `<Toaster />`
-- [ ] `src/app/layout.tsx` — add minimal `ThemeProvider` (system-preference only for v1)
-- [ ] `src/lib/client-id.ts` — generate + read `client_id` in localStorage
+- [x] `src/app/layout.tsx` — add `<Toaster />` + `<TooltipProvider>`
+- [x] `src/app/layout.tsx` — add minimal `ThemeProvider` (system-preference only for v1)
+- [x] `src/lib/client-id.ts` — generate + read `client_id` in localStorage
 
 ---
 
@@ -67,11 +67,10 @@ Location: `src/components/sim/engine/`.
 ## 2 — Canvas + UI shell
 
 - [ ] `src/lib/store.ts` — Zustand store (config, runtime, runStatus)
-- [ ] `src/components/sim/SimulationCanvas.tsx` — canvas, resize observer, RAF loop, glyph rendering, flash animation. Captures `window.innerWidth`/`innerHeight` at run start.
-- [ ] 🧍 Rock / Paper / Scissors SVG assets committed (see `docs/USER-INPUTS.md`); fallback to emojis if missing
+- [ ] `src/components/sim/SimulationCanvas.tsx` — canvas, resize observer, RAF loop, emoji-glyph rendering (🪨 📄 ✂️), flash animation. Captures `window.innerWidth`/`innerHeight` at run start.
 - [ ] `src/components/sim/FloatingControls.tsx` — counts (10–20), placement, movement mode, step size, speed, PRNG select, seed input (mulberry32 only), chaos toggle, start/pause/reset, predicted-winner picker
 - [ ] `src/components/sim/FloatingAnalytics.tsx` — opens bottom drawer
-- [ ] `src/components/sim/FloatingAbout.tsx` — sheet with project explainer + optional sign-in
+- [ ] `src/components/sim/FloatingAbout.tsx` — sheet with project + stat-test explainer
 - [ ] `src/components/sim/FloatingToggle.tsx` — master hide-all; corner peek-button restores
 - [ ] `src/app/page.tsx` — replace template with canvas + floating UI
 - [ ] Keyboard shortcuts: `space` pause, `r` reset, `a` analytics, `h` hide UI
@@ -88,31 +87,24 @@ Location: `src/components/sim/engine/`.
 - [ ] `src/components/sim/charts/Heatmap.tsx` (CSS grid using `--chart-*` tokens)
 - [ ] `src/components/sim/charts/Scorecard.tsx` (stat tiles + shadcn tooltip copy)
 - [ ] `src/components/sim/AnalyticsDrawer.tsx` + `tabs/ThisRun.tsx`, `tabs/History.tsx`, `tabs/Leaderboard.tsx`
-- [ ] Run-end toast: **winner + duration** prominent; "Save" is auto
+- [ ] Run-end toast: **winner + duration** prominent; save is automatic
 
 ---
 
 ## 4 — Persistence
 
-- [ ] `src/app/api/simulations/route.ts` — `POST` (validates `winner`, `duration_ms`, `screen_w`, `screen_h`, `client_id`), `GET` list
-- [ ] `src/app/api/simulations/[id]/route.ts` — `GET` detail including samples
+- [ ] `src/app/api/simulations/route.ts` — `POST` (validates `winner`, `duration_ms`, `screen_w`, `screen_h`, `client_id`) and `GET` list filtered by `?client_id=`
+- [ ] `src/app/api/simulations/[id]/route.ts` — `GET` detail (+ samples); server verifies the `client_id` matches the row before returning
 - [ ] `src/app/api/simulations/batch/route.ts` — bulk insert for auto-run
 - [ ] `src/app/api/leaderboard/route.ts` — reads `leaderboard_view`
+- [ ] Soft rate limit: reject writes when that `client_id` has ≥ 1000 runs
 - [ ] Wire `ThisRun` tab to POST on run end; wire `History` and `Leaderboard` tabs to GETs
 - [ ] Run-detail dialog (on History row click)
-- [ ] Smoke-test: complete a run without signing in; row appears with the four required fields
+- [ ] Smoke-test: complete a run; row appears with the four required fields
 
 ---
 
-## 5 — Optional auth
-
-- [ ] Magic-link sign-in surfaced in the About sheet (not blocking anywhere)
-- [ ] On first login, merge `simulations` where `client_id` = current LS id AND `user_id IS NULL` into `user_id`
-- [ ] Server-side soft cap at 1000 runs per `user_id` or `client_id`; return 429 with message
-
----
-
-## 6 — Auto-run + workers
+## 5 — Auto-run + workers
 
 - [ ] `src/components/sim/workers/batch-runner.worker.ts` — imports engine; runs N sims headless; `postMessage` progress
 - [ ] Batch-run UI: count input (1–1000), progress bar, cancel
@@ -120,19 +112,19 @@ Location: `src/components/sim/engine/`.
 
 ---
 
-## 7 — Fun extras
+## 6 — Fun extras
 
 - [ ] Winner prediction field persisted on each run
 - [ ] Chaos-mode slider (chaos probability 0–50%) wired through engine
 - [ ] Motion trails (alpha fade on each clear)
-- [ ] 🧍 Victory fanfare — WebAudio synth only, no external asset (confirmed; skip if you'd rather have a real sound)
+- [ ] Victory fanfare (WebAudio synth, no external asset)
 - [ ] Mute switch in controls
 - [ ] PNG export: offscreen canvas composites final frame + stats panel; `canvas.toBlob` + `navigator.clipboard.write` / download
 - [ ] Kill-chain view — engine records `transformedBy`; tree rendered in run-detail dialog
 
 ---
 
-## 8 — Polish
+## 7 — Polish
 
 - [ ] Empty / loading / error states everywhere
 - [ ] A11y: aria-labels on floating buttons, focus rings, keyboard-reachable drawer close

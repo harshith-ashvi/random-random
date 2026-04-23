@@ -8,27 +8,27 @@ See `PRD.md` for *what & why*. This doc covers *how & in what order*.
 - **Tailwind 4** with OKLCH tokens already set up in `src/app/globals.css`, including `--chart-1..5` used by Recharts.
 - **shadcn/ui** (radix-nova style). `Button` already present; more to add.
 - **Recharts** for charts.
-- **@supabase/supabase-js** + **@supabase/ssr** for DB + optional auth.
+- **@supabase/supabase-js** + **@supabase/ssr** for DB (reads from server with the Supabase **secret key**; writes through Route Handlers).
 - **Zustand** for the run-config / runtime store (light, no provider boilerplate).
 - **Sonner** for toasts.
 - Package manager: **bun**.
 
-## Auth model
+## Identity model
 
-- **Login is optional.** Anyone can open the app, run simulations, save results, and view analytics/leaderboard without an account.
-- Every browser gets a `client_id` (UUID) in `localStorage` on first visit. That id is attached to every saved run.
-- Sign-in (magic link) is a purely additive feature: on first login, any rows with the current `client_id` and `user_id IS NULL` are reclaimed by attaching `user_id`. Everything else continues to work.
+- **No auth. No accounts.** Every browser gets a `client_id` (UUID) in `localStorage` on first visit.
+- `client_id` is attached to every saved run and used by the API to filter "your history".
+- Clearing localStorage ⇒ fresh identity. Acceptable for this project.
 
 ## Required per-run record
 
-Every completed simulation MUST persist these four at minimum:
+Every completed simulation MUST persist these at minimum:
 
 1. **`winner`** — which type ended the run (`rock` \| `paper` \| `scissors` \| `timeout`).
 2. **`duration_ms`** — wall-clock time from start to end.
 3. **`screen_w`, `screen_h`** — viewport dimensions captured at run start.
-4. **`client_id`** — so anonymous runs are attributable to a browser.
+4. **`client_id`** — browser identity.
 
-These are non-nullable (except `winner` can be `timeout`). Anything else is a nice-to-have.
+These are non-nullable.
 
 ## Data model
 
@@ -37,7 +37,6 @@ These are non-nullable (except `winner` can be `timeout`). Anything else is a ni
 | column | type | notes |
 | --- | --- | --- |
 | `id` | uuid pk | |
-| `user_id` | uuid null | fk → `auth.users`; null for anon runs |
 | `client_id` | text not null | localStorage UUID |
 | `created_at` | timestamptz default now() | |
 | `winner` | text not null | `rock` \| `paper` \| `scissors` \| `timeout` |
@@ -71,8 +70,9 @@ These are non-nullable (except `winner` can be `timeout`). Anything else is a ni
 
 ### RLS
 
-- `simulations`: public insert (no auth required); select own rows by `auth.uid() = user_id` OR `client_id` header match; `leaderboard_view` exposes only anonymized aggregates and is world-readable.
-- `simulation_samples`: mirrors parent.
+- Anon + authenticated can INSERT (using the **publishable** key from the browser, with `client_id` not null).
+- There is no SELECT policy for anon — the browser never reads raw rows directly.
+- The server Route Handlers use the **secret** key (bypasses RLS) and filter by the `client_id` supplied by the client. `leaderboard_view` exposes only aggregates and is granted SELECT to anon.
 
 ### Migration
 
@@ -97,7 +97,7 @@ These are non-nullable (except `winner` can be `timeout`). Anything else is a ni
 - `src/app/api/simulations/batch/route.ts` — batch insert for auto-run.
 - `src/app/api/leaderboard/route.ts` — reads `leaderboard_view`.
 - `supabase/migrations/0001_init.sql`.
-- `.env.example` — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- `.env.example` — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`.
 
 **Modified:**
 
@@ -114,20 +114,20 @@ These are non-nullable (except `winner` can be `timeout`). Anything else is a ni
 
 - Canvas-driven UI is client. Use `'use client'` at the top of `SimulationCanvas.tsx` and the floating components; keep `layout.tsx` server.
 - Route Handlers at `src/app/api/**/route.ts`. Import `NextRequest` from `next/server`. For dynamic segments use the generated `RouteContext<'/path/[id]'>` helper; `ctx.params` is a `Promise` — `await` it.
-- Server Supabase client via `@supabase/ssr` (cookie-based). Browser client in client components only.
+- Server Supabase client uses the **secret** key (no cookie/auth wiring). Browser client uses the **publishable** key for inserts only.
 - Tailwind 4 — no `tailwind.config.*`. Use existing CSS variables.
 
 ## Phases
 
 ### Phase 0 — Foundations (~0.5 day)
 
-- [ ] `bun add @supabase/supabase-js @supabase/ssr recharts zustand sonner`.
-- [ ] Add shadcn primitives: `drawer sheet slider tabs select switch input tooltip sonner card badge label separator skeleton dialog`.
-- [ ] Supabase project created; `0001_init.sql` applied.
-- [ ] `.env.example` and `.env.local` wired.
-- [ ] Supabase browser + server clients.
-- [ ] `<Toaster />` and `ThemeProvider` in `layout.tsx`.
-- [ ] Generate + persist `client_id` in `localStorage` on first load.
+- [x] `bun add @supabase/supabase-js @supabase/ssr recharts zustand sonner`.
+- [x] Add shadcn primitives: `drawer sheet slider tabs select switch input tooltip sonner card badge label separator skeleton dialog`.
+- [x] `.env.example` and `.env` wired (publishable + secret keys).
+- [x] Supabase browser (publishable) + server (secret) clients.
+- [x] `<Toaster />` and `ThemeProvider` in `layout.tsx`.
+- [x] Generate + persist `client_id` in `localStorage` on first load.
+- [ ] Supabase project: apply `0001_init.sql` and expose the service-role key via `.env`.
 
 ### Phase 1 — Engine (~1 day)
 
@@ -141,7 +141,7 @@ These are non-nullable (except `winner` can be `timeout`). Anything else is a ni
 
 ### Phase 2 — Canvas + UI shell (~1 day)
 
-- [ ] `SimulationCanvas` — mounts, resizes to viewport, runs RAF, renders rock/paper/scissors glyphs (emoji or inline SVG), transform flash animation. Capture `window.innerWidth`/`innerHeight` at run start into the store.
+- [ ] `SimulationCanvas` — mounts, resizes to viewport, runs RAF, renders rock/paper/scissors glyphs as emoji (🪨 📄 ✂️), transform flash animation. Capture `window.innerWidth`/`innerHeight` at run start into the store.
 - [ ] `FloatingControls` — counts (slider 10–20), placement, movement mode, step size, speed, PRNG, seed (enabled for mulberry32), chaos toggle, start/pause/reset.
 - [ ] `FloatingAnalytics`, `FloatingAbout`, `FloatingToggle` (hide-all).
 - [ ] Zustand store — run config + runtime state.
@@ -157,25 +157,21 @@ These are non-nullable (except `winner` can be `timeout`). Anything else is a ni
 
 ### Phase 4 — Persistence (~0.5 day)
 
-- [ ] On run end, POST summary + samples to `/api/simulations`. Runs save for anon users too — no auth gate.
-- [ ] Server validates presence of `winner`, `duration_ms`, `screen_w`, `screen_h`, `client_id`.
-- [ ] `History` tab hits `GET /api/simulations` (filtered by `user_id` if logged in, else `client_id`).
-- [ ] `Leaderboard` tab hits `GET /api/leaderboard`.
-- [ ] Run-detail dialog fetches `GET /api/simulations/[id]`.
+- [ ] `POST /api/simulations`: server reads `client_id` from the request body, validates the four required fields, writes with service-role client. No auth.
+- [ ] `GET /api/simulations?client_id=…`: list runs for that client.
+- [ ] `GET /api/simulations/[id]?client_id=…`: detail with samples (server verifies `client_id` matches the row before returning).
+- [ ] `GET /api/leaderboard`: reads `leaderboard_view`.
+- [ ] Soft rate limit: 1000 rows per `client_id` enforced server-side; return 429 with message.
+- [ ] Wire `ThisRun` to POST on run end; `History` and `Leaderboard` to GETs.
+- [ ] Run-detail dialog on clicking a History row.
 
-### Phase 5 — Optional auth (~0.5 day)
-
-- [ ] Magic-link sign-in — clearly optional, surfaced in About sheet only.
-- [ ] On login, merge rows where `client_id` matches current localStorage id and `user_id IS NULL`.
-- [ ] Server-side soft cap: 1000 runs per `user_id` OR per `client_id` (whichever applies).
-
-### Phase 6 — Auto-run + workers (~1 day)
+### Phase 5 — Auto-run + workers (~1 day)
 
 - [ ] `batch-runner.worker.ts` imports engine; runs N sims headless; streams progress.
 - [ ] Progress UI + cancel.
 - [ ] `POST /api/simulations/batch` endpoint for bulk insert.
 
-### Phase 7 — Fun extras (~0.5 day)
+### Phase 6 — Fun extras (~0.5 day)
 
 - [ ] Winner prediction UI before start; persisted per run.
 - [ ] Chaos mode in collision rule.
@@ -184,31 +180,31 @@ These are non-nullable (except `winner` can be `timeout`). Anything else is a ni
 - [ ] PNG export — canvas + stats panel composited onto an offscreen canvas.
 - [ ] Kill-chain view — engine records `transformedBy` on each entity; render as a tree.
 
-### Phase 8 — Polish (~0.5 day)
+### Phase 7 — Polish (~0.5 day)
 
 - [ ] Empty/loading/error states; a11y on floating buttons; aria-labels and focus rings.
 - [ ] README update with env setup and a local Supabase note.
 - [ ] Lighthouse pass + visual QA on retina.
 
-Total: ~6–7 working days.
+Total: ~5.5–6.5 working days.
 
 ## Verification
 
 **Manual:**
 
 1. `bun dev` → `/`. Canvas fills the viewport. 30 entities move. Collisions transform correctly.
-2. Complete a run **without signing in** → toast shows winner + duration; row appears in `simulations` with `user_id NULL`, `client_id` set, and `duration_ms` / `screen_w` / `screen_h` populated.
+2. Complete a run → toast shows winner + duration; row appears in `simulations` with `client_id` set and all four required fields populated.
 3. Open Analytics → live population chart updates; post-run chi-square/KS/entropy shown.
 4. Choose `mulberry32` with seed `42` → run twice → identical duration and winner.
 5. Toggle Hide UI → all floating buttons vanish; corner peek-button restores them.
-6. Auto-run 100× with `math-random`, then 100× with `crypto-random` → leaderboard shows per-PRNG aggregates (no login needed).
-7. Optionally sign in → prior anon runs from the same browser attach to the new account.
+6. Auto-run 100× with `math-random`, then 100× with `crypto-random` → leaderboard shows per-PRNG aggregates.
+7. Clear localStorage → History is empty (new `client_id`); runs resume saving fine under the new identity.
 8. Export PNG result card → looks correct on retina.
 
 **Automated:**
 
 - `bun test` for engine (determinism, RPS rule, bounce, stats, `RunResult` has winner/duration/screen) and stats modules (chi-square, KS, entropy).
-- Playwright smoke: load `/` as a fresh anon user, run seeded mulberry32, assert a row appears in History with the expected four required fields.
+- Playwright smoke: load `/` as a fresh browser, run seeded mulberry32, assert a row appears in History with the expected four required fields.
 
 ## Tracking
 

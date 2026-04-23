@@ -103,6 +103,18 @@ describe("step / transforms", () => {
     expect(world.entities.every((e) => e.type === "paper")).toBe(true);
   });
 
+  test("rock + paper + scissors triple overlap: rock does NOT become scissors in one tick", () => {
+    const world = createWorld(400, 400);
+    world.entities.push(
+      { id: 0, type: "rock", x: 100, y: 100, angle: 0, flashUntil: 0, transformedBy: null },
+      { id: 1, type: "paper", x: 100, y: 100, angle: Math.PI, flashUntil: 0, transformedBy: null },
+      { id: 2, type: "scissors", x: 100, y: 100, angle: Math.PI / 2, flashUntil: 0, transformedBy: null },
+    );
+    const stats = createStats();
+    step(world, stats, createPRNG("mulberry32", 1), baseStepCfg, 16);
+    expect(world.entities[0]!.type).toBe("paper");
+  });
+
   test("overlapping same-type pair ⇒ no change", () => {
     const world = createWorld(400, 400);
     world.entities.push(

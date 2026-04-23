@@ -66,14 +66,14 @@ Location: `src/components/sim/engine/`.
 
 ## 2 — Canvas + UI shell
 
-- [ ] `src/lib/store.ts` — Zustand store (config, runtime, runStatus)
-- [ ] `src/components/sim/SimulationCanvas.tsx` — canvas, resize observer, RAF loop, emoji-glyph rendering (🪨 📄 ✂️), flash animation. Captures `window.innerWidth`/`innerHeight` at run start.
-- [ ] `src/components/sim/FloatingControls.tsx` — counts (10–20), placement, movement mode, step size, speed, PRNG select, seed input (mulberry32 only), chaos toggle, start/pause/reset, predicted-winner picker
-- [ ] `src/components/sim/FloatingAnalytics.tsx` — opens bottom drawer
-- [ ] `src/components/sim/FloatingAbout.tsx` — sheet with project + stat-test explainer
-- [ ] `src/components/sim/FloatingToggle.tsx` — master hide-all; corner peek-button restores
-- [ ] `src/app/page.tsx` — replace template with canvas + floating UI
-- [ ] Keyboard shortcuts: `space` pause, `r` reset, `a` analytics, `h` hide UI
+- [x] `src/lib/store.ts` — Zustand store (config, runtime, runStatus)
+- [x] `src/components/sim/SimulationCanvas.tsx` — canvas, resize observer, RAF loop, emoji-glyph rendering (🪨 📄 ✂️), flash animation. Captures `window.innerWidth`/`innerHeight` at run start.
+- [x] `src/components/sim/FloatingControls.tsx` — counts (10–20), placement, movement mode, step size, speed, PRNG select, seed input (mulberry32 only), chaos toggle, start/pause/reset, predicted-winner picker
+- [x] `src/components/sim/FloatingAnalytics.tsx` — opens bottom drawer
+- [x] `src/components/sim/FloatingAbout.tsx` — sheet with project + stat-test explainer
+- [x] `src/components/sim/FloatingToggle.tsx` — master hide-all; corner peek-button restores
+- [x] `src/app/page.tsx` — replace template with canvas + floating UI
+- [x] Keyboard shortcuts: `space` pause, `r` reset, `a` analytics, `h` hide UI
 
 ---
 

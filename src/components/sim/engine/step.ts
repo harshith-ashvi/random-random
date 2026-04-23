@@ -70,10 +70,13 @@ export function step(
   rebuildHash(world);
 
   const resolvedPairs = new Set<number>();
+  const lockedThisTick = new Set<number>();
   for (const a of entities) {
+    if (lockedThisTick.has(a.id)) continue;
     const neighbours = world.hash.neighbours(a);
     for (const b of neighbours) {
       if (a.id >= b.id) continue;
+      if (lockedThisTick.has(b.id)) continue;
       const key = a.id * 0x10000 + b.id;
       if (resolvedPairs.has(key)) continue;
       if (!overlaps(a, b)) continue;
@@ -86,6 +89,8 @@ export function step(
       loser.type = outcome.newType;
       loser.flashUntil = world.elapsedMs + config.flashDurationMs;
       loser.transformedBy = outcome.winnerId;
+      lockedThisTick.add(loser.id);
+      if (a.id === loser.id) break;
     }
   }
 

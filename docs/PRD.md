@@ -19,6 +19,7 @@
 ## 4. Core experience
 
 ### 4.1 Simulation
+
 - Full-viewport HTML Canvas 2D background.
 - Initial population: N rocks, N paper, N scissors. N ∈ [10, 20]. Default 10.
 - Placement: `random` (default) or `grouped` (one type per corner). User-configurable.
@@ -34,6 +35,7 @@
 - Controls: start / pause / step / reset, speed multiplier 0.5×/1×/2×/4×.
 
 ### 4.2 PRNG comparison (the actual experiment)
+
 - Selectable per run: `math-random`, `crypto-random`, `mulberry32`.
 - `mulberry32` accepts a user seed for reproducibility.
 - Every random draw is accumulated into a 20-bucket histogram over [0, 1) — not the raw stream, to keep storage small.
@@ -41,11 +43,13 @@
 - Position visits accumulated into a 32×32 heatmap.
 
 ### 4.3 Statistical measurements (shown in analytics, with tooltips)
+
 - **Chi-square goodness-of-fit** on the draws histogram → p-value. Tooltip: "probability that observed bucket counts came from a truly uniform distribution; p < 0.05 is suspicious."
 - **Kolmogorov–Smirnov (KS) test** on the empirical CDF vs uniform → D statistic + p-value. Tooltip: "largest gap between the observed and ideal cumulative distributions."
 - **Direction entropy** — Shannon entropy in bits over 16 angular buckets. Max 4.0 bits = perfect uniform direction choice.
 
 ### 4.4 UI shell
+
 - Canvas is the background.
 - Floating **Controls** (bottom-left): counts, placement, movement mode, step size, speed, PRNG, seed, chaos toggle, start/pause/reset.
 - Floating **Analytics** (bottom-right): opens bottom drawer.
@@ -54,9 +58,11 @@
 - Run-end toast: winner + duration + auto-save (authed) or "Save" prompt (anon).
 
 ### 4.5 Analytics drawer (bottom drawer)
+
 Three tabs:
 
 **This Run** — live during a run, frozen after:
+
 - Population-over-time (stacked area).
 - Draws histogram (bar).
 - Direction histogram (bar).
@@ -67,16 +73,19 @@ Three tabs:
 **History** — user's past runs (by user_id or client_id); filter by PRNG, movement mode, counts; click → detail dialog with per-run charts.
 
 **Leaderboard** — global aggregates (anonymized):
+
 - Fastest convergence, longest run, biggest comeback (min population of eventual winner).
 - Win-rate matrix: rows = PRNG, cols = type; percentages.
 - Mean/median convergence time per PRNG.
 
 ### 4.6 Auto-run mode
+
 - Queue 1 to 1000 runs with the current config.
 - Runs headless in a web worker (no render cost) and save in batches.
 - Progress bar + cancel.
 
 ### 4.7 Extras (in scope for v1)
+
 - **Winner prediction** — pick a type before starting; hit-rate tracked in the user's profile.
 - **Chaos mode** — on collision, small configurable chance the loser becomes a *random* type instead of the winner's type.
 - **Motion trails** — fading alpha on the canvas clear for visual intuition.
@@ -93,24 +102,28 @@ Three tabs:
 - Rate limit: 1000 runs per `user_id` or `client_id` (soft cap, server-enforced; auto-run counts).
 
 ### 5.2 Schema
+
 - `simulations` — one row per run, summary stats only (fast queries).
 - `simulation_samples` — histograms, heatmap, and sampled population series per run (loaded only in detail view).
 - `leaderboard_view` — public, anonymized aggregate view.
 - See `PLAN.md` → *Data model* for exact columns + RLS.
 
 ## 6. Success criteria
+
 - A user opens the app, gets a running sim within 1s, and sees a converged result in under 30s for default config.
 - After 100 runs across PRNGs, the leaderboard shows measurable differences (or the lack thereof) in per-PRNG convergence time.
 - Chi-square / KS tooltips are understandable by a developer who hasn't taken stats in a decade.
 - Everything works offline-except-save for anon users; saves succeed as soon as network returns.
 
 ## 7. Out of scope (v1)
+
 - WebGL rendering (we're at 30–60 entities; Canvas 2D is plenty).
 - Real-time multi-user rooms.
 - Generating custom distributions (we analyze; we don't correct).
 - Mobile touch gestures (responsive layout only).
 
 ## 8. Open questions
+
 - Global vs authed-only leaderboard. (Planning: global, with hashed `client_id` for anon identity.)
 - Dark/light toggle in UI, or follow system. (Planning: follow system for v1.)
 - Default keyboard shortcuts — `space` pause, `r` reset, `a` analytics, `h` hide UI. Open to change.

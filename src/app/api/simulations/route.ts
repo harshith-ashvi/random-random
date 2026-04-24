@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "client_id query param required" }, { status: 400 });
   }
 
-  const limit = Math.min(200, Math.max(1, Number(url.searchParams.get("limit") ?? "50")));
+  const limit = Math.min(1000, Math.max(1, Number(url.searchParams.get("limit") ?? "50")));
 
   const supabase = createServiceClient();
   const { data, error } = await supabase

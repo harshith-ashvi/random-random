@@ -12,6 +12,7 @@ import { useSimStore } from "@/lib/store";
 import { ThisRunTab } from "./analytics/ThisRun";
 import { HistoryTab } from "./analytics/History";
 import { LeaderboardTab } from "./analytics/Leaderboard";
+import { AggregateTab } from "./analytics/Aggregate";
 
 export function AnalyticsDrawer() {
   const analyticsOpen = useSimStore((s) => s.analyticsOpen);
@@ -29,13 +30,17 @@ export function AnalyticsDrawer() {
 
         <div className="flex-1 overflow-y-auto px-4">
           <Tabs defaultValue="this-run" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-3">
+            <TabsList className="grid w-full max-w-xl grid-cols-4">
               <TabsTrigger value="this-run">This Run</TabsTrigger>
+              <TabsTrigger value="aggregate">All Runs</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
               <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
             </TabsList>
             <TabsContent value="this-run" className="mt-3">
               <ThisRunTab />
+            </TabsContent>
+            <TabsContent value="aggregate" className="mt-3">
+              <AggregateTab />
             </TabsContent>
             <TabsContent value="history" className="mt-3">
               <HistoryTab />

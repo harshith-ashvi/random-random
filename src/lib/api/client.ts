@@ -67,8 +67,13 @@ export async function saveRun(
   return res.json();
 }
 
-export async function fetchHistory(clientId: string): Promise<SimulationListRow[]> {
-  const res = await fetch(`/api/simulations?client_id=${encodeURIComponent(clientId)}`);
+export async function fetchHistory(
+  clientId: string,
+  limit = 50,
+): Promise<SimulationListRow[]> {
+  const res = await fetch(
+    `/api/simulations?client_id=${encodeURIComponent(clientId)}&limit=${limit}`,
+  );
   if (!res.ok) throw new Error(`history fetch failed (${res.status})`);
   const body = (await res.json()) as { rows: SimulationListRow[] };
   return body.rows;

@@ -83,7 +83,7 @@ type SimStore = {
 };
 
 export const DEFAULT_CONFIG: SimConfig = {
-  countPerType: 10,
+  countPerType: 20,
   placement: "random",
   movementMode: "jitter",
   stepPx: 3,

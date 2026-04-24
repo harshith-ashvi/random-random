@@ -2,12 +2,7 @@
 
 import { Play, Pause, RotateCcw, Settings2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -21,8 +16,13 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useSimStore } from "@/lib/store";
-import { BatchRunner } from "./BatchRunner";
-import type { EntityType, MovementMode, Placement, PrngKind } from "@/lib/supabase/types";
+// import { BatchRunner } from "./BatchRunner";
+import type {
+  EntityType,
+  MovementMode,
+  Placement,
+  PrngKind,
+} from "@/lib/supabase/types";
 
 const SPEEDS: Array<0.5 | 1 | 2 | 4> = [0.5, 1, 2, 4];
 
@@ -161,7 +161,9 @@ export function FloatingControls() {
           <Label className="text-xs">Movement</Label>
           <Select
             value={config.movementMode}
-            onValueChange={(v) => setConfig({ movementMode: v as MovementMode })}
+            onValueChange={(v) =>
+              setConfig({ movementMode: v as MovementMode })
+            }
             disabled={!canEdit}
           >
             <SelectTrigger className="h-8 text-xs">
@@ -169,7 +171,9 @@ export function FloatingControls() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="jitter">Jitter (random every tick)</SelectItem>
-              <SelectItem value="persistent">Persistent (small turns)</SelectItem>
+              <SelectItem value="persistent">
+                Persistent (small turns)
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -205,7 +209,9 @@ export function FloatingControls() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="math-random">Math.random</SelectItem>
-              <SelectItem value="crypto-random">crypto.getRandomValues</SelectItem>
+              <SelectItem value="crypto-random">
+                crypto.getRandomValues
+              </SelectItem>
               <SelectItem value="mulberry32">Mulberry32 (seeded)</SelectItem>
             </SelectContent>
           </Select>
@@ -285,9 +291,9 @@ export function FloatingControls() {
           </div>
         </div>
 
-        <Separator />
+        {/* <Separator />
 
-        <BatchRunner />
+        <BatchRunner /> */}
       </CardContent>
     </Card>
   );

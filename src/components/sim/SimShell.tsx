@@ -59,6 +59,25 @@ export function SimShell() {
     toast(`${label} wins`, {
       description: `${(lastResult.durationMs / 1000).toFixed(1)}s • ${lastResult.tickCount.toLocaleString()} ticks`,
     });
+
+    const clientId = getClientId();
+    if (!clientId) return;
+    let cancelled = false;
+    import("@/lib/api/client").then(async ({ saveRun }) => {
+      try {
+        await saveRun(lastResult, clientId);
+        if (!cancelled) window.dispatchEvent(new CustomEvent("rr:run-saved"));
+      } catch (err) {
+        if (!cancelled) {
+          toast.error("Couldn't save run", {
+            description: err instanceof Error ? err.message : "Unknown error",
+          });
+        }
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [status, lastResult]);
 
   return (

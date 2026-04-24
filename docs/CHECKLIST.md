@@ -93,14 +93,14 @@ Location: `src/components/sim/engine/`.
 
 ## 4 — Persistence
 
-- [ ] `src/app/api/simulations/route.ts` — `POST` (validates `winner`, `duration_ms`, `screen_w`, `screen_h`, `client_id`) and `GET` list filtered by `?client_id=`
-- [ ] `src/app/api/simulations/[id]/route.ts` — `GET` detail (+ samples); server verifies the `client_id` matches the row before returning
-- [ ] `src/app/api/simulations/batch/route.ts` — bulk insert for auto-run
-- [ ] `src/app/api/leaderboard/route.ts` — reads `leaderboard_view`
-- [ ] Soft rate limit: reject writes when that `client_id` has ≥ 1000 runs
-- [ ] Wire `ThisRun` tab to POST on run end; wire `History` and `Leaderboard` tabs to GETs
-- [ ] Run-detail dialog (on History row click)
-- [ ] Smoke-test: complete a run; row appears with the four required fields
+- [x] `src/app/api/simulations/route.ts` — `POST` (validates `winner`, `duration_ms`, `screen_w`, `screen_h`, `client_id`) and `GET` list filtered by `?client_id=`
+- [x] `src/app/api/simulations/[id]/route.ts` — `GET` detail (+ samples); server verifies the `client_id` matches the row before returning
+- [x] `src/app/api/simulations/batch/route.ts` — bulk insert for auto-run
+- [x] `src/app/api/leaderboard/route.ts` — reads `leaderboard_view`
+- [x] Soft rate limit: reject writes when that `client_id` has ≥ 1000 runs
+- [x] Wire `ThisRun` tab to POST on run end; wire `History` and `Leaderboard` tabs to GETs
+- [x] Run-detail dialog (on History row click)
+- [x] Smoke-test: complete a run; row appears with the four required fields
 
 ---
 

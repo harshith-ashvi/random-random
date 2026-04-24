@@ -51,6 +51,15 @@ export type SimulationInsert = Omit<SimulationRow, "id" | "created_at">;
 
 export type SimulationSamplesInsert = SimulationSamplesRow;
 
+export type LeaderboardRow = {
+  prng: PrngKind;
+  winner: Winner;
+  runs: number;
+  median_duration_ms: number;
+  min_duration_ms: number;
+  max_duration_ms: number;
+};
+
 export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "12";
@@ -61,24 +70,31 @@ export type Database = {
         Row: SimulationRow;
         Insert: SimulationInsert;
         Update: Partial<SimulationInsert>;
+        Relationships: [];
       };
       simulation_samples: {
         Row: SimulationSamplesRow;
         Insert: SimulationSamplesInsert;
         Update: Partial<SimulationSamplesInsert>;
+        Relationships: [
+          {
+            foreignKeyName: "simulation_samples_simulation_id_fkey";
+            columns: ["simulation_id"];
+            isOneToOne: true;
+            referencedRelation: "simulations";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {
       leaderboard_view: {
-        Row: {
-          prng: PrngKind;
-          winner: Winner;
-          runs: number;
-          median_duration_ms: number;
-          min_duration_ms: number;
-          max_duration_ms: number;
-        };
+        Row: LeaderboardRow;
+        Relationships: [];
       };
     };
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };

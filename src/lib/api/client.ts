@@ -2,6 +2,7 @@
 
 import type { LeaderboardRow, SimulationRow, SimulationSamplesRow } from "@/lib/supabase/types";
 import type { RunSummary, SimConfig } from "@/lib/store";
+import type { BatchRunSummary } from "@/components/sim/workers/batch-runner.worker";
 
 export type SimulationListRow = Omit<SimulationRow, "client_id">;
 
@@ -47,6 +48,69 @@ export function buildSavePayload(result: RunSummary, clientId: string) {
       population_series: result.stats.populationSeries,
     },
   };
+}
+
+export function buildBatchItemPayload(
+  summary: BatchRunSummary,
+  config: SimConfig,
+  clientId: string,
+) {
+  return {
+    simulation: {
+      client_id: clientId,
+      winner: summary.winner,
+      duration_ms: Math.round(summary.durationMs),
+      screen_w: summary.screenW,
+      screen_h: summary.screenH,
+      tick_count: summary.tickCount,
+      prng: summary.configPrng,
+      seed: summary.configPrng === "mulberry32" ? summary.configSeed : null,
+      movement_mode: config.movementMode,
+      step_px: config.stepPx,
+      placement: config.placement,
+      counts: {
+        rock: config.countPerType,
+        paper: config.countPerType,
+        scissors: config.countPerType,
+      },
+      chaos_mode: config.chaosMode,
+      predicted_winner: config.predictedWinner,
+      min_population_of_winner: summary.minPopulationOfWinner,
+      chi_square_stat: summary.chiSquareStat,
+      chi_square_p: summary.chiSquareP,
+      ks_stat: summary.ksStat,
+      ks_p: summary.ksP,
+      direction_entropy_bits: summary.directionEntropyBits,
+      draws_total: summary.drawsTotal,
+    },
+    samples: {
+      draws_histogram: summary.drawsHist,
+      direction_histogram: summary.dirHist,
+      heatmap: summary.heatmap,
+      population_series: summary.populationSeries,
+    },
+  };
+}
+
+export async function saveRunBatch(
+  summaries: BatchRunSummary[],
+  config: SimConfig,
+  clientId: string,
+): Promise<{ ids: string[] }> {
+  if (summaries.length === 0) return { ids: [] };
+  const items = summaries.map((s) => buildBatchItemPayload(s, config, clientId));
+  const res = await fetch("/api/simulations/batch", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items }),
+  });
+  if (!res.ok) {
+    const { error } = (await res.json().catch(() => ({ error: res.statusText }))) as {
+      error?: string;
+    };
+    throw new Error(error ?? `batch save failed (${res.status})`);
+  }
+  return res.json();
 }
 
 export async function saveRun(

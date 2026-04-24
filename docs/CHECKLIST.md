@@ -106,9 +106,9 @@ Location: `src/components/sim/engine/`.
 
 ## 5 — Auto-run + workers
 
-- [ ] `src/components/sim/workers/batch-runner.worker.ts` — imports engine; runs N sims headless; `postMessage` progress
-- [ ] Batch-run UI: count input (1–1000), progress bar, cancel
-- [ ] Client batches POSTs to `/api/simulations/batch` (e.g. 50 at a time)
+- [x] `src/components/sim/workers/batch-runner.worker.ts` — imports engine; runs N sims headless; `postMessage` progress
+- [x] Batch-run UI: count input (1–1000), progress bar, cancel
+- [x] Client batches POSTs to `/api/simulations/batch` (e.g. 50 at a time)
 
 ---
 

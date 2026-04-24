@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useSimStore } from "@/lib/store";
+import { BatchRunner } from "./BatchRunner";
 import type { EntityType, MovementMode, Placement, PrngKind } from "@/lib/supabase/types";
 
 const SPEEDS: Array<0.5 | 1 | 2 | 4> = [0.5, 1, 2, 4];
@@ -283,6 +284,10 @@ export function FloatingControls() {
             ))}
           </div>
         </div>
+
+        <Separator />
+
+        <BatchRunner />
       </CardContent>
     </Card>
   );

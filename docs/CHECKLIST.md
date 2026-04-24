@@ -79,15 +79,15 @@ Location: `src/components/sim/engine/`.
 
 ## 3 — Stats + analytics drawer
 
-- [ ] `src/lib/stats/chi-square.ts` + tests (textbook example)
-- [ ] `src/lib/stats/ks.ts` + tests (known distribution pair)
-- [ ] `src/lib/stats/entropy.ts` + tests (uniform ⇒ log2(k))
-- [ ] `src/components/sim/charts/PopulationArea.tsx` (Recharts stacked area)
-- [ ] `src/components/sim/charts/Histogram.tsx` (Recharts bar)
-- [ ] `src/components/sim/charts/Heatmap.tsx` (CSS grid using `--chart-*` tokens)
-- [ ] `src/components/sim/charts/Scorecard.tsx` (stat tiles + shadcn tooltip copy)
-- [ ] `src/components/sim/AnalyticsDrawer.tsx` + `tabs/ThisRun.tsx`, `tabs/History.tsx`, `tabs/Leaderboard.tsx`
-- [ ] Run-end toast: **winner + duration** prominent; save is automatic
+- [x] `src/lib/stats/chi-square.ts` + tests (textbook example)
+- [x] `src/lib/stats/ks.ts` + tests (known distribution pair)
+- [x] `src/lib/stats/entropy.ts` + tests (uniform ⇒ log2(k))
+- [x] `src/components/sim/charts/PopulationArea.tsx` (Recharts stacked area)
+- [x] `src/components/sim/charts/Histogram.tsx` (Recharts bar)
+- [x] `src/components/sim/charts/Heatmap.tsx` (CSS grid using `--chart-*` tokens)
+- [x] `src/components/sim/charts/Scorecard.tsx` (stat tiles + shadcn tooltip copy)
+- [x] `src/components/sim/AnalyticsDrawer.tsx` + `tabs/ThisRun.tsx`, `tabs/History.tsx`, `tabs/Leaderboard.tsx`
+- [x] Run-end toast: **winner + duration** prominent; save automatic in Phase 4
 
 ---
 

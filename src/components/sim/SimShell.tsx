@@ -7,6 +7,7 @@ import { FloatingControls } from "./FloatingControls";
 import { FloatingAnalytics } from "./FloatingAnalytics";
 import { FloatingAbout } from "./FloatingAbout";
 import { FloatingToggle } from "./FloatingToggle";
+import { AnalyticsDrawer } from "./AnalyticsDrawer";
 import { useSimStore } from "@/lib/store";
 import { getClientId } from "@/lib/client-id";
 
@@ -71,6 +72,7 @@ export function SimShell() {
         </>
       )}
       <FloatingToggle />
+      <AnalyticsDrawer />
     </>
   );
 }

@@ -17,6 +17,9 @@ import {
   type PRNG,
   type StepConfig,
 } from "@/components/sim/engine";
+import { chiSquareUniform } from "@/lib/stats/chi-square";
+import { ksUniformFromHistogram } from "@/lib/stats/ks";
+import { shannonEntropyBits } from "@/lib/stats/entropy";
 
 const GLYPH: Record<EntityType, string> = {
   rock: "🪨",
@@ -112,6 +115,10 @@ export function SimulationCanvas() {
 
       const w = winnerOf(finalWinner) ?? "timeout";
 
+      const chi = chiSquareUniform(loop.stats.drawsHist);
+      const ks = ksUniformFromHistogram(loop.stats.drawsHist);
+      const ent = shannonEntropyBits(loop.stats.dirHist);
+
       setLastResult({
         winner: w,
         durationMs: loop.world.elapsedMs,
@@ -125,11 +132,11 @@ export function SimulationCanvas() {
             : Number.isFinite(loop.stats.populationMin[w])
               ? loop.stats.populationMin[w]
               : 0,
-        chiSquareStat: null,
-        chiSquareP: null,
-        ksStat: null,
-        ksP: null,
-        directionEntropyBits: null,
+        chiSquareStat: chi.stat,
+        chiSquareP: chi.pValue,
+        ksStat: ks.stat,
+        ksP: ks.pValue,
+        directionEntropyBits: ent.bits,
         drawsTotal: loop.rng.drawCount(),
         stats: {
           tick: loop.world.tick,

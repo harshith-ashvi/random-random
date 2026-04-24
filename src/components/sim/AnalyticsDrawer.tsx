@@ -1,0 +1,51 @@
+"use client";
+
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSimStore } from "@/lib/store";
+import { ThisRunTab } from "./analytics/ThisRun";
+import { HistoryTab } from "./analytics/History";
+import { LeaderboardTab } from "./analytics/Leaderboard";
+
+export function AnalyticsDrawer() {
+  const analyticsOpen = useSimStore((s) => s.analyticsOpen);
+  const setAnalyticsOpen = useSimStore((s) => s.setAnalyticsOpen);
+
+  return (
+    <Drawer open={analyticsOpen} onOpenChange={setAnalyticsOpen}>
+      <DrawerContent className="max-h-[85vh]">
+        <DrawerHeader className="pb-2">
+          <DrawerTitle>Analytics</DrawerTitle>
+          <DrawerDescription>
+            Live stats + post-run randomness tests. How random is random?
+          </DrawerDescription>
+        </DrawerHeader>
+
+        <div className="flex-1 overflow-y-auto px-4">
+          <Tabs defaultValue="this-run" className="w-full">
+            <TabsList className="grid w-full max-w-md grid-cols-3">
+              <TabsTrigger value="this-run">This Run</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+            </TabsList>
+            <TabsContent value="this-run" className="mt-3">
+              <ThisRunTab />
+            </TabsContent>
+            <TabsContent value="history" className="mt-3">
+              <HistoryTab />
+            </TabsContent>
+            <TabsContent value="leaderboard" className="mt-3">
+              <LeaderboardTab />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}

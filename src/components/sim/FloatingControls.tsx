@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useSimStore } from "@/lib/store";
+import { unlockAudio } from "@/lib/audio";
 // import { BatchRunner } from "./BatchRunner";
 import type {
   EntityType,
@@ -33,6 +34,10 @@ export function FloatingControls() {
   const setStatus = useSimStore((s) => s.setStatus);
   const controlsOpen = useSimStore((s) => s.controlsOpen);
   const setControlsOpen = useSimStore((s) => s.setControlsOpen);
+  const muted = useSimStore((s) => s.muted);
+  const toggleMuted = useSimStore((s) => s.toggleMuted);
+  const trailsOn = useSimStore((s) => s.trailsOn);
+  const setTrailsOn = useSimStore((s) => s.setTrailsOn);
 
   const isRunning = status === "running";
   const isPaused = status === "paused";
@@ -289,6 +294,33 @@ export function FloatingControls() {
               </Button>
             ))}
           </div>
+        </div>
+
+        <Separator />
+
+        <div className="flex items-center justify-between">
+          <Label className="text-xs" htmlFor="trails">
+            Motion trails
+          </Label>
+          <Switch
+            id="trails"
+            checked={trailsOn}
+            onCheckedChange={(v) => setTrailsOn(v)}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label className="text-xs" htmlFor="mute">
+            Sound
+          </Label>
+          <Switch
+            id="mute"
+            checked={!muted}
+            onCheckedChange={(v) => {
+              if (v) unlockAudio();
+              if (muted === v) toggleMuted();
+            }}
+          />
         </div>
 
         {/* <Separator />

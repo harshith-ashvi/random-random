@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { SimulationCanvas } from "./SimulationCanvas";
 import { FloatingControls } from "./FloatingControls";
 import { FloatingAnalytics } from "./FloatingAnalytics";
@@ -10,6 +12,7 @@ import { FloatingToggle } from "./FloatingToggle";
 import { AnalyticsDrawer } from "./AnalyticsDrawer";
 import { useSimStore } from "@/lib/store";
 import { getClientId } from "@/lib/client-id";
+import { downloadBlob, exportRunPng } from "@/lib/png-export";
 
 export function SimShell() {
   const uiHidden = useSimStore((s) => s.uiHidden);
@@ -58,6 +61,24 @@ export function SimShell() {
         : `${lastResult.winner === "rock" ? "🪨" : lastResult.winner === "paper" ? "📄" : "✂️"} ${lastResult.winner}`;
     toast(`${label} wins`, {
       description: `${(lastResult.durationMs / 1000).toFixed(1)}s • ${lastResult.tickCount.toLocaleString()} ticks`,
+      action: {
+        label: "Save PNG",
+        onClick: async () => {
+          const result = useSimStore.getState().lastResult;
+          const url = useSimStore.getState().lastFrameDataUrl;
+          if (!result) return;
+          try {
+            const blob = await exportRunPng(result, url);
+            if (!blob) throw new Error("PNG encode failed");
+            const ts = new Date().toISOString().replace(/[:.]/g, "-");
+            downloadBlob(blob, `random-random-${result.winner}-${ts}.png`);
+          } catch (err) {
+            toast.error("Couldn't export PNG", {
+              description: err instanceof Error ? err.message : "Unknown error",
+            });
+          }
+        },
+      },
     });
 
     const clientId = getClientId();
@@ -80,6 +101,22 @@ export function SimShell() {
     };
   }, [status, lastResult]);
 
+  const lastFrameDataUrl = useSimStore((s) => s.lastFrameDataUrl);
+
+  const onDownload = async () => {
+    if (!lastResult) return;
+    try {
+      const blob = await exportRunPng(lastResult, lastFrameDataUrl);
+      if (!blob) throw new Error("PNG encode failed");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      downloadBlob(blob, `random-random-${lastResult.winner}-${ts}.png`);
+    } catch (err) {
+      toast.error("Couldn't export PNG", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  };
+
   return (
     <>
       <SimulationCanvas />
@@ -88,6 +125,17 @@ export function SimShell() {
           <FloatingControls />
           <FloatingAnalytics />
           <FloatingAbout />
+          {status === "ended" && lastResult && (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 shadow-md"
+              onClick={onDownload}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Save PNG
+            </Button>
+          )}
         </>
       )}
       <FloatingToggle />

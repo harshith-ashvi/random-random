@@ -10,6 +10,8 @@ import { PopulationArea } from "@/components/sim/charts/PopulationArea";
 import { Histogram } from "@/components/sim/charts/Histogram";
 import { Heatmap } from "@/components/sim/charts/Heatmap";
 import { Scorecard, type ScoreTile } from "@/components/sim/charts/Scorecard";
+import { KillChain } from "@/components/sim/charts/KillChain";
+import type { EntityType } from "@/lib/supabase/types";
 
 const DRAWS_LABEL = (i: number) => {
   const lo = (i / 20).toFixed(2);
@@ -148,6 +150,25 @@ export function ThisRunTab() {
           </CardHeader>
           <CardContent className="p-2">
             <Heatmap values={source.heatmap} />
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader className="pb-1">
+            <CardTitle className="text-xs font-medium">
+              Kill chain — survivor lineage
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-2">
+            <KillChain
+              transformLog={source.transformLog}
+              survivors={source.finalSurvivors}
+              winnerType={
+                status === "ended" && lastResult && lastResult.winner !== "timeout"
+                  ? (lastResult.winner as EntityType)
+                  : null
+              }
+            />
           </CardContent>
         </Card>
       </div>

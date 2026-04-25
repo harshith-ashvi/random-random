@@ -114,13 +114,13 @@ Location: `src/components/sim/engine/`.
 
 ## 6 — Fun extras
 
-- [ ] Winner prediction field persisted on each run
-- [ ] Chaos-mode slider (chaos probability 0–50%) wired through engine
-- [ ] Motion trails (alpha fade on each clear)
-- [ ] Victory fanfare (WebAudio synth, no external asset)
-- [ ] Mute switch in controls
-- [ ] PNG export: offscreen canvas composites final frame + stats panel; `canvas.toBlob` + `navigator.clipboard.write` / download
-- [ ] Kill-chain view — engine records `transformedBy`; tree rendered in run-detail dialog
+- [x] Winner prediction field persisted on each run
+- [x] Chaos-mode slider (chaos probability 0–50%) wired through engine
+- [x] Motion trails (alpha fade on each clear)
+- [x] Victory fanfare (WebAudio synth, no external asset)
+- [x] Mute switch in controls
+- [x] PNG export: offscreen canvas composites final frame + stats panel; `canvas.toBlob` + `navigator.clipboard.write` / download
+- [x] Kill-chain view — engine records `transformedBy`; tree rendered in run-detail dialog
 
 ---
 

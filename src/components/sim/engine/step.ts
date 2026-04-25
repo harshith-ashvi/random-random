@@ -5,7 +5,7 @@ import type { Stats } from "./stats";
 import { ENTITY_RADIUS } from "./entity";
 import { rebuildHash } from "./world";
 import { overlaps, resolveCollision } from "./collision";
-import { recordAngle, recordDraw, recordPosition, sampleIfDue } from "./stats";
+import { recordAngle, recordDraw, recordPosition, recordTransform, sampleIfDue } from "./stats";
 
 const TWO_PI = Math.PI * 2;
 
@@ -89,6 +89,13 @@ export function step(
       loser.type = outcome.newType;
       loser.flashUntil = world.elapsedMs + config.flashDurationMs;
       loser.transformedBy = outcome.winnerId;
+      recordTransform(stats, {
+        atMs: world.elapsedMs,
+        loserId: outcome.loserId,
+        winnerId: outcome.winnerId,
+        prevType: outcome.prevType,
+        newType: outcome.newType,
+      });
       lockedThisTick.add(loser.id);
       if (a.id === loser.id) break;
     }

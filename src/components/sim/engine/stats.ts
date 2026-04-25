@@ -6,8 +6,17 @@ export const HEATMAP_COLS = 32;
 export const HEATMAP_ROWS = 32;
 export const HEATMAP_SIZE = HEATMAP_COLS * HEATMAP_ROWS;
 export const POPULATION_SAMPLE_INTERVAL_MS = 200;
+export const TRANSFORM_LOG_CAP = 4096;
 
 const TWO_PI = Math.PI * 2;
+
+export type TransformEvent = {
+  atMs: number;
+  loserId: number;
+  winnerId: number;
+  prevType: EntityType;
+  newType: EntityType;
+};
 
 export type Stats = {
   drawsHist: number[];
@@ -16,6 +25,7 @@ export type Stats = {
   populationSeries: PopulationSample[];
   populationMin: { rock: number; paper: number; scissors: number };
   lastSampleAtMs: number;
+  transformLog: TransformEvent[];
 };
 
 export function createStats(): Stats {
@@ -26,7 +36,13 @@ export function createStats(): Stats {
     populationSeries: [],
     populationMin: { rock: Infinity, paper: Infinity, scissors: Infinity },
     lastSampleAtMs: -Infinity,
+    transformLog: [],
   };
+}
+
+export function recordTransform(stats: Stats, evt: TransformEvent): void {
+  if (stats.transformLog.length >= TRANSFORM_LOG_CAP) return;
+  stats.transformLog.push(evt);
 }
 
 export function recordDraw(stats: Stats, value: number): void {

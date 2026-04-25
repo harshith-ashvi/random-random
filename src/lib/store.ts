@@ -10,6 +10,7 @@ import type {
   Winner,
 } from "@/lib/supabase/types";
 import type { PopulationSample } from "@/lib/supabase/types";
+import type { TransformEvent } from "@/components/sim/engine";
 
 export type RunStatus = "idle" | "running" | "paused" | "ended";
 
@@ -39,6 +40,8 @@ export type LiveStatsSnapshot = {
   heatmap: number[];
   populationSeries: PopulationSample[];
   drawsTotal: number;
+  transformLog: TransformEvent[];
+  finalSurvivors: { id: number; type: EntityType }[];
 };
 
 export type RunSummary = {
@@ -64,22 +67,26 @@ type SimStore = {
   status: RunStatus;
   liveStats: LiveStatsSnapshot | null;
   lastResult: RunSummary | null;
+  lastFrameDataUrl: string | null;
   uiHidden: boolean;
   analyticsOpen: boolean;
   aboutOpen: boolean;
   controlsOpen: boolean;
   muted: boolean;
+  trailsOn: boolean;
 
   setConfig: (patch: Partial<SimConfig>) => void;
   setStatus: (s: RunStatus) => void;
   setLiveStats: (snap: LiveStatsSnapshot | null) => void;
   setLastResult: (r: RunSummary | null) => void;
+  setLastFrameDataUrl: (v: string | null) => void;
   toggleUi: () => void;
   setUiHidden: (v: boolean) => void;
   setAnalyticsOpen: (v: boolean) => void;
   setAboutOpen: (v: boolean) => void;
   setControlsOpen: (v: boolean) => void;
   toggleMuted: () => void;
+  setTrailsOn: (v: boolean) => void;
 };
 
 export const DEFAULT_CONFIG: SimConfig = {
@@ -104,22 +111,26 @@ export const useSimStore = create<SimStore>((set) => ({
   status: "idle",
   liveStats: null,
   lastResult: null,
+  lastFrameDataUrl: null,
   uiHidden: false,
   analyticsOpen: false,
   aboutOpen: false,
   controlsOpen: true,
   muted: true,
+  trailsOn: true,
 
   setConfig: (patch) => set((s) => ({ config: { ...s.config, ...patch } })),
   setStatus: (status) => set({ status }),
   setLiveStats: (liveStats) => set({ liveStats }),
   setLastResult: (lastResult) => set({ lastResult }),
+  setLastFrameDataUrl: (lastFrameDataUrl) => set({ lastFrameDataUrl }),
   toggleUi: () => set((s) => ({ uiHidden: !s.uiHidden })),
   setUiHidden: (uiHidden) => set({ uiHidden }),
   setAnalyticsOpen: (analyticsOpen) => set({ analyticsOpen }),
   setAboutOpen: (aboutOpen) => set({ aboutOpen }),
   setControlsOpen: (controlsOpen) => set({ controlsOpen }),
   toggleMuted: () => set((s) => ({ muted: !s.muted })),
+  setTrailsOn: (trailsOn) => set({ trailsOn }),
 }));
 
 export function countsFromConfig(config: SimConfig): Counts {

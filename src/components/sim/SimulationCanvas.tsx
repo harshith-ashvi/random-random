@@ -20,6 +20,7 @@ import {
 import { chiSquareUniform } from "@/lib/stats/chi-square";
 import { ksUniformFromHistogram } from "@/lib/stats/ks";
 import { shannonEntropyBits } from "@/lib/stats/entropy";
+import { playClick, playFanfare, unlockAudio } from "@/lib/audio";
 
 const GLYPH: Record<EntityType, string> = {
   rock: "🪨",
@@ -43,6 +44,7 @@ type Loop = {
   counts: Counts;
   rafId: number | null;
   prevFrameMs: number;
+  lastAudioCursor: number;
 };
 
 export function SimulationCanvas() {
@@ -68,6 +70,8 @@ export function SimulationCanvas() {
         heatmap: loop.stats.heatmap.slice(),
         populationSeries: loop.stats.populationSeries.slice(),
         drawsTotal: loop.rng.drawCount(),
+        transformLog: loop.stats.transformLog.slice(),
+        finalSurvivors: loop.world.entities.map((e) => ({ id: e.id, type: e.type })),
       });
     },
     [setLiveStats],
@@ -81,9 +85,17 @@ export function SimulationCanvas() {
     if (!ctx) return;
 
     const { screenW, screenH, world } = loop;
+    const trailsOn = useSimStore.getState().trailsOn;
     ctx.save();
     ctx.setTransform(dprRef.current, 0, 0, dprRef.current, 0, 0);
-    ctx.clearRect(0, 0, screenW, screenH);
+    if (trailsOn && useSimStore.getState().status === "running") {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillRect(0, 0, screenW, screenH);
+      ctx.globalCompositeOperation = "source-over";
+    } else {
+      ctx.clearRect(0, 0, screenW, screenH);
+    }
 
     ctx.font = `${ENTITY_RADIUS * 2}px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif`;
     ctx.textAlign = "center";
@@ -147,9 +159,20 @@ export function SimulationCanvas() {
           heatmap: loop.stats.heatmap.slice(),
           populationSeries: loop.stats.populationSeries.slice(),
           drawsTotal: loop.rng.drawCount(),
+          transformLog: loop.stats.transformLog.slice(),
+          finalSurvivors: loop.world.entities.map((e) => ({ id: e.id, type: e.type })),
         },
         config: loop.config,
       });
+
+      if (!useSimStore.getState().muted) playFanfare(w);
+
+      try {
+        const c = canvasRef.current;
+        if (c) useSimStore.getState().setLastFrameDataUrl(c.toDataURL("image/png"));
+      } catch {
+        useSimStore.getState().setLastFrameDataUrl(null);
+      }
 
       setStatus("ended");
     },
@@ -181,6 +204,14 @@ export function SimulationCanvas() {
           break;
         }
       }
+
+      if (!useSimStore.getState().muted) {
+        const log = loop.stats.transformLog;
+        for (let i = loop.lastAudioCursor; i < log.length; i++) {
+          playClick(log[i]!.newType);
+        }
+      }
+      loop.lastAudioCursor = loop.stats.transformLog.length;
 
       draw();
 
@@ -257,7 +288,10 @@ export function SimulationCanvas() {
       counts: countsFromConfig(config),
       rafId: null,
       prevFrameMs: 0,
+      lastAudioCursor: 0,
     };
+
+    if (!useSimStore.getState().muted) unlockAudio();
 
     snapshot(loopRef.current);
     draw();
@@ -292,9 +326,11 @@ export function SimulationCanvas() {
         counts: { rock: 0, paper: 0, scissors: 0 },
         rafId: null,
         prevFrameMs: 0,
+        lastAudioCursor: 0,
       };
     }
     setLiveStats(null);
+    useSimStore.getState().setLastFrameDataUrl(null);
 
     const ctx = canvas?.getContext("2d");
     if (ctx && canvas) {

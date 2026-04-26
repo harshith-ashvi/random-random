@@ -18,18 +18,21 @@ export function LeaderboardTab() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setError(null);
     try {
       const data = await fetchLeaderboard();
       setRows(data);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "failed to load");
     }
   }, []);
 
   useEffect(() => {
-    load();
-    const onSaved = () => load();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+    const onSaved = () => {
+      void load();
+    };
     window.addEventListener("rr:run-saved", onSaved);
     return () => window.removeEventListener("rr:run-saved", onSaved);
   }, [load]);

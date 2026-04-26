@@ -24,18 +24,21 @@ export function HistoryTab() {
   const load = useCallback(async () => {
     const clientId = getClientId();
     if (!clientId) return;
-    setError(null);
     try {
       const data = await fetchHistory(clientId);
       setRows(data);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "failed to load");
     }
   }, []);
 
   useEffect(() => {
-    load();
-    const onSaved = () => load();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+    const onSaved = () => {
+      void load();
+    };
     window.addEventListener("rr:run-saved", onSaved);
     return () => window.removeEventListener("rr:run-saved", onSaved);
   }, [load]);

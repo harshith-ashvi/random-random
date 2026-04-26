@@ -60,6 +60,7 @@ A visual lab for interrogating JavaScript PRNG quality, dressed up as a full-scr
 | `bun start` | Start the prod build |
 | `bun run lint` | ESLint |
 | `bun test` | Engine + stats unit tests |
+| `bun run test:e2e` | Playwright smoke test (requires `bunx playwright install chromium` once) |
 
 ## Keyboard shortcuts
 

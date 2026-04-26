@@ -179,6 +179,8 @@ export function SimulationCanvas() {
     [setLastResult, setStatus],
   );
 
+  const frameRef = useRef<(t: number) => void>(() => {});
+
   const frame = useCallback(
     (t: number) => {
       const loop = loopRef.current;
@@ -226,18 +228,22 @@ export function SimulationCanvas() {
         return;
       }
 
-      loop.rafId = requestAnimationFrame(frame);
+      loop.rafId = requestAnimationFrame(frameRef.current);
     },
     [draw, endRun, snapshot],
   );
+
+  useEffect(() => {
+    frameRef.current = frame;
+  }, [frame]);
 
   const startLoop = useCallback(() => {
     const loop = loopRef.current;
     if (!loop) return;
     if (loop.rafId !== null) return;
     loop.prevFrameMs = performance.now();
-    loop.rafId = requestAnimationFrame(frame);
-  }, [frame]);
+    loop.rafId = requestAnimationFrame(frameRef.current);
+  }, []);
 
   const initRun = useCallback(() => {
     const canvas = canvasRef.current;

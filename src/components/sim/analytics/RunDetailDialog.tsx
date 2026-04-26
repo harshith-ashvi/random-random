@@ -28,19 +28,24 @@ export function RunDetailDialog({ id, open, onOpenChange }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id || !open) {
-      setDetail(null);
-      setError(null);
-      return;
-    }
+    if (!id || !open) return;
     const clientId = getClientId();
     if (!clientId) return;
     let cancelled = false;
     fetchSimulation(id, clientId)
-      .then((d) => !cancelled && setDetail(d))
-      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : "failed"));
+      .then((d) => {
+        if (cancelled) return;
+        setDetail(d);
+        setError(null);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : "failed");
+      });
     return () => {
       cancelled = true;
+      setDetail(null);
+      setError(null);
     };
   }, [id, open]);
 

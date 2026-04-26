@@ -129,14 +129,14 @@ Location: `src/components/sim/engine/`.
 - [x] Empty / loading / error states everywhere
 - [x] A11y: aria-labels on floating buttons, focus rings, keyboard-reachable drawer close
 - [x] `README.md` — setup steps, env variables, migration command
-- [ ] Lighthouse pass
-- [ ] Retina visual QA
+- [ ] 🧍 Lighthouse pass (run in Chrome DevTools → Lighthouse → Mobile + Desktop)
+- [ ] 🧍 Retina visual QA (open at 2× DPR; verify emoji glyphs are crisp, charts not blurry)
 
 ---
 
 ## Final sign-off
 
-- [ ] Manual verification steps in `docs/PLAN.md` §Verification all pass
-- [ ] `bun test` green
-- [ ] Playwright smoke test green
-- [ ] Branch merged to `main`
+- [ ] 🧍 Manual verification steps in `docs/PLAN.md` §Verification all pass
+- [x] `bun test` green (39 pass, engine + stats)
+- [x] Playwright smoke test green (`bun run test:e2e`)
+- [ ] 🧍 Branch merged to `main`

@@ -1,13 +1,16 @@
 "use client";
 
+import { X } from "lucide-react";
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { useSimStore } from "@/lib/store";
 import { ThisRunTab } from "./analytics/ThisRun";
 import { HistoryTab } from "./analytics/History";
@@ -21,11 +24,21 @@ export function AnalyticsDrawer() {
   return (
     <Drawer open={analyticsOpen} onOpenChange={setAnalyticsOpen}>
       <DrawerContent className="max-h-[85vh]">
-        <DrawerHeader className="pb-2">
+        <DrawerHeader className="relative pb-2">
           <DrawerTitle>Analytics</DrawerTitle>
           <DrawerDescription>
             Live stats + post-run randomness tests. How random is random?
           </DrawerDescription>
+          <DrawerClose asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute right-3 top-3 h-8 w-8"
+              aria-label="Close analytics"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </DrawerClose>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4">

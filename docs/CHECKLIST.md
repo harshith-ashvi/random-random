@@ -126,9 +126,9 @@ Location: `src/components/sim/engine/`.
 
 ## 7 — Polish
 
-- [ ] Empty / loading / error states everywhere
-- [ ] A11y: aria-labels on floating buttons, focus rings, keyboard-reachable drawer close
-- [ ] `README.md` — setup steps, env variables, migration command
+- [x] Empty / loading / error states everywhere
+- [x] A11y: aria-labels on floating buttons, focus rings, keyboard-reachable drawer close
+- [x] `README.md` — setup steps, env variables, migration command
 - [ ] Lighthouse pass
 - [ ] Retina visual QA
 

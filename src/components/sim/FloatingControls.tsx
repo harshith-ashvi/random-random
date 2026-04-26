@@ -155,6 +155,8 @@ export function FloatingControls() {
                 variant={config.speed === s ? "default" : "outline"}
                 className="flex-1 h-8 text-xs"
                 onClick={() => setConfig({ speed: s })}
+                aria-pressed={config.speed === s}
+                aria-label={`Speed ${s}x`}
               >
                 {s}×
               </Button>
@@ -289,6 +291,7 @@ export function FloatingControls() {
                 }
                 disabled={!canEdit}
                 aria-label={`Predict ${t}`}
+                aria-pressed={config.predictedWinner === t}
               >
                 {t === "rock" ? "🪨" : t === "paper" ? "📄" : "✂️"}
               </Button>

@@ -91,8 +91,8 @@ type SimStore = {
 
 export const DEFAULT_CONFIG: SimConfig = {
   countPerType: 20,
-  placement: "random",
-  movementMode: "jitter",
+  placement: "grouped",
+  movementMode: "persistent",
   stepPx: 3,
   turnProbability: 0.05,
   turnAmount: Math.PI / 6,
@@ -116,8 +116,8 @@ export const useSimStore = create<SimStore>((set) => ({
   analyticsOpen: false,
   aboutOpen: false,
   controlsOpen: true,
-  muted: true,
-  trailsOn: true,
+  muted: false,
+  trailsOn: false,
 
   setConfig: (patch) => set((s) => ({ config: { ...s.config, ...patch } })),
   setStatus: (status) => set({ status }),

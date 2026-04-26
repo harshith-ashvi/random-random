@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# random-random
 
-## Getting Started
+A visual lab for interrogating JavaScript PRNG quality, dressed up as a full-screen Rock-Paper-Scissors brawl. Entities move, collide, transform per RPS rules, and the run ends when one type dominates. Every run records the chi-square / KS / direction-entropy stats on the random stream that drove it, so you can compare `Math.random` against `crypto.getRandomValues` against a seeded Mulberry32 over hundreds of runs.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Next.js 16.2.4 (App Router) + React 19 + TypeScript
+- Tailwind 4 + shadcn (radix-nova) primitives
+- Recharts 3 for analytics, Vaul for the bottom drawer
+- Zustand for client state, Sonner for toasts
+- Supabase (Postgres + RLS) for persistence
+- Bun as runtime / package manager / test runner
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Install deps:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   bun install
+   ```
 
-## Learn More
+2. Copy `.env.example` to `.env` and fill in the three values from your Supabase project (Project Settings → API):
 
-To learn more about Next.js, take a look at the following resources:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable / anon key>
+   SUPABASE_SECRET_KEY=<service-role secret key>
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   The publishable key is used in the browser for inserts only (RLS is insert-only). The secret key is server-side; it bypasses RLS for the read endpoints and never reaches the client.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Apply the database schema. The migration lives at `supabase/migrations/0001_init.sql` — paste it into the Supabase SQL editor and run, or pipe via `psql`:
 
-## Deploy on Vercel
+   ```bash
+   psql "$DATABASE_URL" -f supabase/migrations/0001_init.sql
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   It creates two tables (`simulations`, `simulation_samples`), insert-only RLS, and the public `leaderboard_view`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. (Optional) Verify the secret-key client can write end-to-end:
+
+   ```bash
+   bun run --env-file=.env scripts/smoke-supabase.ts
+   ```
+
+5. Run the dev server:
+
+   ```bash
+   bun dev
+   ```
+
+   Open <http://localhost:3000>.
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `bun dev` | Next dev server |
+| `bun run build` | Production build |
+| `bun start` | Start the prod build |
+| `bun run lint` | ESLint |
+| `bun test` | Engine + stats unit tests |
+
+## Keyboard shortcuts
+
+| Key | Action |
+| --- | --- |
+| `Space` | Start / pause / resume |
+| `R` | Reset |
+| `A` | Toggle analytics drawer |
+| `H` | Hide all floating UI |
+
+## How it works
+
+- **Engine** (`src/components/sim/engine/`) — framework-free TypeScript. Spatial-hash collision, deterministic when fed `mulberry32` with a fixed seed. Reusable in a Web Worker for headless batch runs.
+- **PRNGs** (`prng.ts`) — `MathRandom`, `CryptoRandom`, `Mulberry32(seed)`. All three share the `next() ∈ [0,1)` interface. Every draw is bucketed into a 20-bin histogram; angles into 16 bins; positions into a 32×32 heatmap.
+- **Stats** (`src/lib/stats/`) — pure chi-square, KS, and Shannon-entropy helpers, each unit-tested against a textbook example.
+- **Persistence** — runs auto-save to Supabase via `POST /api/simulations`. Anonymous users are tracked by a `client_id` in localStorage; the server verifies the id before returning a row.
+- **Analytics drawer** — four tabs:
+  - *This Run* — live charts + post-run scorecard + kill-chain lineage of the survivor.
+  - *All Runs* — aggregates across your local history (winner pie, duration histogram, χ² p-value distribution, etc.).
+  - *History* — table of past runs with a detail dialog.
+  - *Leaderboard* — global top-N reading from `leaderboard_view`.
+
+## Project docs
+
+- `docs/PLAN.md` — phased implementation plan
+- `docs/CHECKLIST.md` — ordered task list, line-by-line
+- `docs/USER-INPUTS.md` — things only the user can do (Supabase project, env values, migration apply)
